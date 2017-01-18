@@ -83,9 +83,9 @@ files would be clobbered by a subsequent `rbuild -s`. To avoid this, `rbuild`
 supports an rsync exclude list passed to rsync via its `--exclude-file`
 option. `rbuild` will look for this list with this order:
 
-* `$LOCAL_DIR/.rbuild_exclude`
-* `$HOME/.rbuild.exclude`
-* Use a built-in list which can be inspected by running `rbuild -x`
+1. `$LOCAL_DIR/.rbuild_exclude`
+1. `$HOME/.rbuild.exclude`
+1. Use a built-in list which can be inspected by running `rbuild -x`
 
 If `autoreconf` is not required, or if it is performed on the local machine,
 use of the exclude list is not required and can be disabled using an empty
