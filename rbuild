@@ -36,15 +36,15 @@ function load_conf {
             exit 1
         fi
     else
-        . $conf
+        . "$conf"
     fi
 
-    LOCAL_DIR=${LOCAL_DIR:-$(dirname $(upsearch $LOCAL_DIR_ANCHORS))}
+    LOCAL_DIR=${LOCAL_DIR:-$(dirname "$(upsearch $LOCAL_DIR_ANCHORS)")}
     # cd into dir to normalize it
-    cd $LOCAL_DIR
+    cd "$LOCAL_DIR"
     LOCAL_DIR=$PWD
-    BASENAME=${BASENAME:-$(basename $LOCAL_DIR)}
-    STAGING_DIR=${STAGING_DIR:-$RBUILD_DIR/$BASENAME}
+    BASENAME=${BASENAME:-$(basename "$LOCAL_DIR")}
+    STAGING_DIR="${STAGING_DIR:-$RBUILD_DIR/$BASENAME}"
     BUILD_DIR=${BUILD_DIR:-$RBUILD_DIR/$BASENAME.$BUILD_ENV}
 
     if [ -z "$BUILD_HOST" ]; then
@@ -59,7 +59,7 @@ function load_conf {
 function stage {
     echo Staging source from $LOCAL_DIR to $BUILD_HOST:$STAGING_DIR
 
-    if [ -e $PWD/.rbuild.exclude ]; then
+    if [ -e "$PWD/.rbuild.exclude" ]; then
         exclude="$PWD/.rbuild.exclude"
         echo >&2 "Using rsync exclude file $exclude"
     else
@@ -72,17 +72,17 @@ function stage {
         fi
     fi
 
-    rsync -r -l -c --executability --del --inplace  -z -e "$SSH" --rsync-path="mkdir -p $STAGING_DIR && rsync" --cvs-exclude --exclude .hg --exclude .git --exclude-from <($0 -x) $LOCAL_DIR/ $BUILD_HOST:$STAGING_DIR
+    rsync -r -l -c --executability --del --inplace  -z -e "$SSH" --rsync-path="mkdir -p \"$STAGING_DIR\" && rsync" --cvs-exclude --exclude .hg --exclude .git --exclude-from <($0 -x) "$LOCAL_DIR/" "$BUILD_HOST:\"$STAGING_DIR\""
 }
 
 function autoreconf {
     echo Remote autoreconf in $BUILD_HOST:$STAGING_DIR
-    $SSH $BUILD_HOST "cd $STAGING_DIR && autoreconf --install"
+    $SSH $BUILD_HOST "cd \"$STAGING_DIR\" && autoreconf --install"
 }
 
 function configure {
     echo Remote configure in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "mkdir -p $BUILD_DIR && cd $BUILD_DIR && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" CC=\"$CC\" CFLAGS=\"$CFLAGS\" CCAS=gcc CCASFLAGS= ../$BASENAME/configure $CONFIGURE_ARGS"
+    $SSH $BUILD_HOST "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" CC=\"$CC\" CFLAGS=\"$CFLAGS\" CCAS=gcc CCASFLAGS= \"../$BASENAME/configure\" $CONFIGURE_ARGS"
 }
 
 function build {
@@ -107,7 +107,7 @@ function deploy {
         exit 1
     fi
     echo Deploy $INSTALL_DIR/$BASENAME from $BUILD_HOST to $DEPLOY_HOST
-    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path="\"mkdir -p $INSTALL_DIR && rsync\"" $INSTALL_DIR/$BASENAME/ $DEPLOY_HOST:$INSTALL_DIR/$BASENAME
+    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path="\"mkdir -p $INSTALL_DIR && rsync\"" "$INSTALL_DIR/$BASENAME/" "$DEPLOY_HOST:$INSTALL_DIR/$BASENAME"
 }
 
 function deploy_source {
@@ -117,7 +117,7 @@ function deploy_source {
         exit 1
     fi
     echo Code push $STAGING_DIR from $BUILD_HOST to $DEPLOY_HOST
-    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" $STAGING_DIR/ $DEPLOY_HOST:$STAGING_DIR
+    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" "$STAGING_DIR/" "$DEPLOY_HOST:$STAGING_DIR"
 }
 
 function retract_source {
