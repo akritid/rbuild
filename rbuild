@@ -2,7 +2,7 @@
 
 LC_CTYPE=C
 SSH="ssh -o BatchMode=yes -o StrictHostKeyChecking=no -o ForwardAgent=yes"
-ANCHORS=".hg .git configure.ac"
+LOCAL_DIR_ANCHORS=".hg .git configure.ac"
 BUILD_ENV=debug
 INSTALL_DIR='$HOME/.local'
 BUILD_JOBS=8
@@ -39,7 +39,7 @@ function load_conf {
         . $conf
     fi
 
-    LOCAL_DIR=${LOCAL_DIR:-$(dirname $(upsearch $ANCHORS))}
+    LOCAL_DIR=${LOCAL_DIR:-$(dirname $(upsearch $LOCAL_DIR_ANCHORS))}
     # cd into dir to normalize it
     cd $LOCAL_DIR
     LOCAL_DIR=$PWD
@@ -82,7 +82,7 @@ function autoreconf {
 
 function configure {
     echo Remote configure in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "mkdir -p $BUILD_DIR && cd $BUILD_DIR && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" CC=\"$CC\" CFLAGS=\"$CFLAGS\" CCAS=gcc CCASFLAGS= ../$BASENAME/configure $CONFIGURE_OPTIONS"
+    $SSH $BUILD_HOST "mkdir -p $BUILD_DIR && cd $BUILD_DIR && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" CC=\"$CC\" CFLAGS=\"$CFLAGS\" CCAS=gcc CCASFLAGS= ../$BASENAME/configure $CONFIGURE_ARGS"
 }
 
 function build {
@@ -237,8 +237,8 @@ export BUILD_ENV
 
 load_conf $config_file
 
-CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS:---disable-silent-rules --prefix $INSTALL_DIR/$BASENAME}"
-CONFIGURE_OPTIONS+=" $EXTRA_CONFIGURE_OPTIONS"
+CONFIGURE_ARGS="${CONFIGURE_ARGS:---prefix $INSTALL_DIR/$BASENAME}"
+CONFIGURE_ARGS+=" $EXTRA_CONFIGURE_ARGS"
 
 if [ $do_stage ]; then
     stage || exit 1
