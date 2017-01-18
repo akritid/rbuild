@@ -1,10 +1,10 @@
 # rbuild: Edit locally, build remotely
 
-rbuild is a simple script to support the workflow of editing C source code
+rbuild is a script to support the workflow of editing C source code
 on a local machine (e.g. a macOS laptop with MacVim), and syncing the
 source code to a remote build machine with full development environment
 (e.g. a Linux server). It can also be used to sync the generated binaries to a
-third machine lacking the development environment.
+third machine lacking a development environment.
 
 In the normal rbuild workflow, the developer edits locally, and
 runs `rbuild -s` to stage the source code to the build machine and
@@ -12,31 +12,46 @@ runs `rbuild -s` to stage the source code to the build machine and
 `rbuild -sb`, which are also the default options when running rbuild
 without any arguments. rbuild requires a configuration file found
 in `$HOME/.rbuild.conf` or provided using the `-C` option. This file
-needs to include a `BUILD_HOST` variable.
+needs to include at the very least a `BUILD_HOST` variable with the name
+of the build machine.
 
 `rbuild -s` stages the source code from `LOCAL_DIR` to
-`BUILD_HOST:RBUILD_DIR\BASENAME` using rsync. `RBUILD_DIR` and `BASENAME` can be overriden,
-but by default `RBUILD_DIR` is `rbuild` and `BASENAME` is the
-basename of `LOCAL_DIR`. `LOCAL_DIR` can be overriden but by default
-is based on the current dir or its first parent that contains one
-fo the files specified in the space-separated list in `LOCAL_DIR_ANCHORS`,
-which can be overriden itself, but defaults to `.hg .git .configure.ac`.
-This helps an rbuild command issued from inside a subdirectory of
-the project, to find the project root directory (the `LOCAL_DIR`).
+`BUILD_HOST:STAGING_DIR` using `rsync`. Unless overriden in the
+config file, `STAGING_DIR` defaults to `RBUILD_DIR\BASENAME`.
+`RBUILD_DIR` and `BASENAME` can be overriden too, but by default
+`RBUILD_DIR` is `rbuild` and `BASENAME` is the basename of `LOCAL_DIR`.
+`LOCAL_DIR` can be overriden but by default is based on the current
+dir or its first parent that contains one fo the files specified
+in the space-separated list in `LOCAL_DIR_ANCHORS`, which can be
+overriden itself, but defaults to `.hg .git .configure.ac`.  This
+helps an rbuild command issued from inside a subdirectory of the
+project, to find the project root directory (the `LOCAL_DIR`).
 
-autoconf-based projects require a one-time setup is required before building.
+autoconf-based projects require a one-time setup before building.
 This can be performed on the build server by hand after `rbuild -s` and
-before the first `rbuild -b`, or the following shortcuts can be used:
+before the first `rbuild -b`. Typically this requires running `autoreconf --install`
+in the remote staging directory `STAGING_DIR`, and
+`configure --prefix $INSTALL_DIR` in the remote build dir, as specified
+by `BUILD_DIR` described later.
+
+The following shortcuts can be used instead of the manual method:
 
 * `rbuild -A` runs `autoreconf --install` in the remote source directory.
 * `rbuild -a` runs `configure --prefix=$INSTALL_DIR` in the remote build directory.
 
-`rbuild -b` performs `make install` in `BUILD_DIR` on the `BUILD_HOST`.
-`BUILD_DIR` can be provided, but the default can be used which is created
-from `RBUILD_DIR/BASENAME.BUILD_ENV`. `BUILD_ENV` defaults to `debug` but
+The remote build directory on `BUILD_HOST` is `BUILD_DIR`.
+It could be specified in the config file, but the default 
+of `RBUILD_DIR/BASENAME.BUILD_ENV` can be used too. `BUILD_ENV` defaults to `debug` but
 can be specified on the rbuild command line using `-e`. The value of
 `BUILD_ENV` can be used inside `.rbuild.conf` to customize the build,
 as can be seen in the provided `sample.rbuild.conf`.
+
+`INSTALL_DIR` defaults to `'$HOME/.local'`. Note that `$HOME` on
+the local machine and the remote build host may differ. Using single
+quotes ensures that the `$HOME` variable is evaluated on the remote
+machine.
+
+`rbuild -b` performs `make install` in `BUILD_DIR` on the `BUILD_HOST`.
 
 Other command line options include:
 
