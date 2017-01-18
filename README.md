@@ -1,10 +1,10 @@
 # rbuild: Edit locally, build remotely
 
 rbuild is a simple script to support the workflow of editing C source code
-on a local machine (e.g. a macOS laptop with MacVim), syncing the
+on a local machine (e.g. a macOS laptop with MacVim), and syncing the
 source code to a remote build machine with full development environment
 (e.g. a Linux server). It can also be used to sync the generated binaries to a
-third machine without a development environment.
+third machine lacking the development environment.
 
 In the normal rbuild workflow, the developer edits locally, and
 runs `rbuild -s` to stage the source code to the build machine and
@@ -49,16 +49,17 @@ Other command line options include:
 * `-B` build a specific makefile target
 
 
-Multiple flags can be combined, e.g. `rbuild -sAabod`. The order of the
-operations is fixed and does not depend on the order of the command line options:
+Multiple flags can be combined, e.g. `rbuild -sAabod`. 
+Any operation specified in the command line is executed
+in this order independently of its position:
 
-* Stage
-* Clean
-* Autoreconf
-* Configure
-* Make
-* Deploy
-* Deploy source
+1. Stage
+1. Clean
+1. Autoreconf
+1. Configure
+1. Make
+1. Deploy
+1. Deploy source
 
 ## rsync exclude list
 
@@ -75,7 +76,7 @@ If `autoreconf` is not required, or if it is performed on the local machine,
 use of the exclude list is not required and can be disabled using an empty
 exclusion list file.
 
-## Vim
+## Vim integration
 
 rbuild arranges for the filenames in the build output to use relative
 paths, so that they can be used by a local editor. For example,
@@ -86,7 +87,7 @@ allows background build with tmux, and `vim-addon-local-vimrc` for
 per-project `.vimrc` files.
 
 
-## Deploying
+## Deploying to a third machine
 
 rbuild can be used to deploy the built binaries from the remote
 build host to another remote host that lacks a development environment.
