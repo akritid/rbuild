@@ -160,26 +160,27 @@ _EOF_
 }
 
 noargs=1
-while getopts "he:scAaB:btdSRoj:i:x" arg; do
+while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
     unset noargs
     case $arg in
         h)
             echo "Usage:" 
-            echo -e "-s\tStage source code from the current directory to BUILD_HOST"
-            echo -e "-c\tRun 'make clean' on BUILD_HOST"
-            echo -e "-A\tRun 'autoreconf --install' on BUILD_HOST"
-            echo -e "-a\tRun 'configure' on BUILD_HOST"
-            echo -e "-B\tRun 'make [target]' on BUILD_HOST"
-            echo -e "-b\tRun 'make install' on BUILD_HOST"
-            echo -e "-d\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
-            echo -e "-S\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
-            echo -e "-R\tRemove source code from DEPLOY_HOST the deploy host"
+            echo -e "-s\t\tStage source code from the current directory to BUILD_HOST"
+            echo -e "-c\t\tRun 'make clean' on BUILD_HOST"
+            echo -e "-A\t\tRun 'autoreconf --install' on BUILD_HOST"
+            echo -e "-a\t\tRun 'configure' on BUILD_HOST"
+            echo -e "-B TARGET\tRun 'make TARGET' on BUILD_HOST"
+            echo -e "-b\t\tRun 'make install' on BUILD_HOST"
+            echo -e "-d\t\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
+            echo -e "-D HOST\t\tDeploy binaries from BUILD_HOST to HOST"
+            echo -e "-S\t\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
+            echo -e "-R\t\tRemove source code from DEPLOY_HOST the deploy host"
             echo
-            echo -e "-e\tSpecify a build environment. Made available as BUILD_ENV for the config file (default=debug)"
-            echo -e "-o\tShortcut to set BUILD_ENV=optimized"
-            echo -e "-j\tDefine number of build jobs to run simultaneously (default: 8)"
-            echo -e "-C\tSpecify the rbuild configuration file (default = $HOME/.rbuild.conf)"
-            echo -e "-x\tDump built-in exclude list"
+            echo -e "-e ENV\t\tSpecify a build environment. Made available as BUILD_ENV for the config file (default=debug)"
+            echo -e "-o\t\tShortcut to set BUILD_ENV=optimized"
+            echo -e "-j\t\tDefine number of build jobs to run simultaneously (default: 8)"
+            echo -e "-C FILE\t\tSpecify the rbuild configuration file (default = $HOME/.rbuild.conf)"
+            echo -e "-x\t\tDump built-in exclude list"
             exit 1
             ;;
         x)
@@ -209,6 +210,10 @@ while getopts "he:scAaB:btdSRoj:i:x" arg; do
         d)
             do_deploy=1
             ;;
+        D)
+            deploy_host=${OPTARG}
+            do_deploy=1
+            ;;
         S)
             do_deploy_source=1
             ;;
@@ -236,6 +241,11 @@ fi
 export BUILD_ENV
 
 load_conf $config_file
+
+
+if [ -n "$deploy_host" ]; then
+    DEPLOY_HOST=$deploy_host
+fi
 
 CONFIGURE_ARGS="${CONFIGURE_ARGS:---prefix $INSTALL_DIR/$BASENAME}"
 CONFIGURE_ARGS+=" $EXTRA_CONFIGURE_ARGS"
