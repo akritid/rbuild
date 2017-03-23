@@ -82,7 +82,7 @@ function autoreconf {
 
 function configure {
     echo Remote configure in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" CC=\"$CC\" CFLAGS=\"$CFLAGS\" CCAS=gcc CCASFLAGS= \"../$BASENAME/configure\" $CONFIGURE_ARGS"
+    $SSH $BUILD_HOST "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && eval $CONFIGURE_VARS \"../$BASENAME/configure\" $CONFIGURE_ARGS"
 }
 
 function build {
@@ -246,6 +246,9 @@ load_conf $config_file
 if [ -n "$deploy_host" ]; then
     DEPLOY_HOST=$deploy_host
 fi
+
+CONFIGURE_VARS="${CONFIGURE_VARS:-PKG_CONFIG_PATH=\'$PKG_CONFIG_PATH\' CC=\'$CC\' CFLAGS=\'$CFLAGS\' CCAS=gcc CCASFLAGS=}"
+CONFIGURE_VARS+=" $EXTRA_CONFIGURE_VARS"
 
 CONFIGURE_ARGS="${CONFIGURE_ARGS:---prefix $INSTALL_DIR/$BASENAME}"
 CONFIGURE_ARGS+=" $EXTRA_CONFIGURE_ARGS"

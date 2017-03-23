@@ -39,6 +39,15 @@ The following shortcuts can be used instead of the manual method:
 * `rbuild -A` runs `autoreconf --install` in the remote source directory.
 * `rbuild -a` runs `configure --prefix=$INSTALL_DIR` in the remote build directory.
 
+The environment variables passed to `configure` by default are `CC`, `CFLAGS`
+and `PKG_CONFIG_PATH`.  To pass additional variables through `.rbuild.conf`:
+
+    EXTRA_CONFIGURE_VARS="LDFLAGS=-L/usr/local/lib LIBS=\'-lm -lpcap\'"
+
+To pass additional command line options to `configure`:
+
+    EXTRA_CONFIGURE_ARGS='--enable-optimizations'
+
 The remote build directory on `BUILD_HOST` is `BUILD_DIR`.
 It could be specified in the config file, but the default 
 of `RBUILD_DIR/BASENAME.BUILD_ENV` can be used too. `BUILD_ENV` defaults to `debug` but
