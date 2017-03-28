@@ -100,6 +100,11 @@ function clean {
     $SSH $BUILD_HOST "make -C $BUILD_DIR clean"
 }
 
+function rm_build_dir {
+    echo Removing $BUILD_HOST:$BUILD_DIR
+    $SSH $BUILD_HOST "rm -rf \"$BUILD_DIR\""
+}
+
 function deploy {
     if [ -z "$DEPLOY_HOST" ]; then
         echo >&2 "DEPLOY_HOST not set"
@@ -160,7 +165,7 @@ _EOF_
 }
 
 noargs=1
-while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
+while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
     unset noargs
     case $arg in
         h)
@@ -171,6 +176,7 @@ while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
             echo -e "-a\t\tRun 'configure' on BUILD_HOST"
             echo -e "-B TARGET\tRun 'make TARGET' on BUILD_HOST"
             echo -e "-b\t\tRun 'make install' on BUILD_HOST"
+            echo -e "-r\t\tRemove build directory (when 'make clean' is not enough)"
             echo -e "-d\t\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
             echo -e "-D HOST\t\tDeploy binaries from BUILD_HOST to HOST"
             echo -e "-S\t\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
@@ -203,6 +209,9 @@ while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
             ;;
         B)
             build_target=${OPTARG}
+            ;;
+        r)
+            do_rm_build_dir=1
             ;;
         b)
             do_build=1
@@ -259,6 +268,10 @@ fi
 
 if [ $do_clean ]; then
     clean || exit 1
+fi
+
+if [ $do_rm_build_dir ]; then
+    rm_build_dir || exit 1
 fi
 
 if [ $do_autoreconf ]; then
