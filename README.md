@@ -65,6 +65,7 @@ machine.
 Other command line options include:
 
 * `-c` to run `make clean` in the build dir
+* `-r` to completely remove the build dir
 * `-j` to control the -j argument of make
 * `-o` is a shortcut to `-e optimized`
 * `-S` copies the source code to the `DEPLOY_HOST` (useful for remote GDB)
