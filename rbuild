@@ -82,7 +82,7 @@ function autoreconf {
 
 function configure {
     echo Remote configure in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\" CC=\"$CC\" CFLAGS=\"$CFLAGS\" CCAS=gcc CCASFLAGS= \"../$BASENAME/configure\" $CONFIGURE_ARGS"
+    $SSH $BUILD_HOST "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && eval $CONFIGURE_VARS \"../$BASENAME/configure\" $CONFIGURE_ARGS"
 }
 
 function build {
@@ -98,6 +98,11 @@ function check {
 function clean {
     echo Remote clean in $BUILD_HOST:$BUILD_DIR
     $SSH $BUILD_HOST "make -C $BUILD_DIR clean"
+}
+
+function rm_build_dir {
+    echo Removing $BUILD_HOST:$BUILD_DIR
+    $SSH $BUILD_HOST "rm -rf \"$BUILD_DIR\""
 }
 
 function deploy {
@@ -160,7 +165,7 @@ _EOF_
 }
 
 noargs=1
-while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
+while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
     unset noargs
     case $arg in
         h)
@@ -171,6 +176,7 @@ while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
             echo -e "-a\t\tRun 'configure' on BUILD_HOST"
             echo -e "-B TARGET\tRun 'make TARGET' on BUILD_HOST"
             echo -e "-b\t\tRun 'make install' on BUILD_HOST"
+            echo -e "-r\t\tRemove build directory (when 'make clean' is not enough)"
             echo -e "-d\t\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
             echo -e "-D HOST\t\tDeploy binaries from BUILD_HOST to HOST"
             echo -e "-S\t\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
@@ -203,6 +209,9 @@ while getopts "he:scAaB:btdD:SRoj:i:x" arg; do
             ;;
         B)
             build_target=${OPTARG}
+            ;;
+        r)
+            do_rm_build_dir=1
             ;;
         b)
             do_build=1
@@ -247,6 +256,9 @@ if [ -n "$deploy_host" ]; then
     DEPLOY_HOST=$deploy_host
 fi
 
+CONFIGURE_VARS="${CONFIGURE_VARS:-PKG_CONFIG_PATH=\'$PKG_CONFIG_PATH\' CC=\'$CC\' CFLAGS=\'$CFLAGS\' CCAS=gcc CCASFLAGS=}"
+CONFIGURE_VARS+=" $EXTRA_CONFIGURE_VARS"
+
 CONFIGURE_ARGS="${CONFIGURE_ARGS:---prefix $INSTALL_DIR/$BASENAME}"
 CONFIGURE_ARGS+=" $EXTRA_CONFIGURE_ARGS"
 
@@ -256,6 +268,10 @@ fi
 
 if [ $do_clean ]; then
     clean || exit 1
+fi
+
+if [ $do_rm_build_dir ]; then
+    rm_build_dir || exit 1
 fi
 
 if [ $do_autoreconf ]; then
