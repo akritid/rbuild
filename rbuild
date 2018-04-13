@@ -167,6 +167,7 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             echo "Usage:" 
             echo -e "-s\t\tStage source code from the current directory to BUILD_HOST"
             echo -e "-c\t\tRun 'make clean' on BUILD_HOST"
+            echo -e "-t\t\tRun 'make check' on BUILD_HOST"
             echo -e "-A\t\tRun 'autoreconf --install' on BUILD_HOST"
             echo -e "-a\t\tRun 'configure' on BUILD_HOST"
             echo -e "-B TARGET\tRun 'make TARGET' on BUILD_HOST"
@@ -195,6 +196,9 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             ;;
         c)
             do_clean=1
+            ;;
+        t)
+            do_check=1
             ;;
         A)
             do_autoreconf=1
@@ -283,6 +287,10 @@ fi
 
 if [ $build_target ]; then
     build $build_target || exit 1
+fi
+
+if [ $do_check ]; then
+    check || exit 1
 fi
 
 if [ $do_deploy ]; then
