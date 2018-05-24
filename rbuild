@@ -180,7 +180,7 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             echo -e "-e ENV\t\tSpecify a build environment. Made available as BUILD_ENV for the config file (default=debug)"
             echo -e "-o\t\tShortcut to set BUILD_ENV=optimized"
             echo -e "-j\t\tDefine number of build jobs to run simultaneously (default: 8)"
-            echo -e "-C FILE\t\tSpecify the rbuild configuration file (default = $HOME/.rbuild.conf)"
+            echo -e "-i FILE\t\tSpecify the rbuild configuration file (default = $HOME/.rbuild.conf)"
             echo -e "-x\t\tDump built-in exclude list"
             exit 1
             ;;
