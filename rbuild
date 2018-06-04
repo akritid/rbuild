@@ -60,19 +60,22 @@ function stage {
     echo Staging source from $LOCAL_DIR to $BUILD_HOST:$STAGING_DIR
 
     if [ -e "$PWD/.rbuild.exclude" ]; then
-        exclude="$PWD/.rbuild.exclude"
-        echo >&2 "Using rsync exclude file $exclude"
+        echo >&2 "Using rsync exclude file $PWD/.rbuild.exclude"
+        exec 100< "$PWD/.rbuild.exclude"
     else
         if [ -e $HOME/.rbuild.exclude ]; then
-            exclude="$HOME/.rbuild.exclude"
-            echo >&2 "Using rsync exclude file $exclude"
+            echo >&2 "Using rsync exclude file $HOME/.rbuild.exclude"
+            exec 100< "$HOME/.rbuild.exclude"
         else
             echo >&2 "Using built-in rsync exclude file list (displayed with $0 -x)"
-            exclude="<($0 -x)"
+            tmpfile=$(mktemp)
+            ($0 -x) > "$tmpfile"
+            exec 100< "$tmpfile"
+            rm "$tmpfile"
         fi
     fi
 
-    rsync -r -l -c --executability --del --inplace  -z -e "$SSH" --rsync-path="mkdir -p \"$STAGING_DIR\" && rsync" --cvs-exclude --exclude .hg --exclude .git --exclude-from <($0 -x) "$LOCAL_DIR/" "$BUILD_HOST:\"$STAGING_DIR\""
+    rsync -r -l -c --executability --del --inplace  -z -e "$SSH" --rsync-path="mkdir -p \"$STAGING_DIR\" && rsync" --cvs-exclude --exclude .hg --exclude .git --exclude-from <(cat <&100) "$LOCAL_DIR/" "$BUILD_HOST:\"$STAGING_DIR\""
 }
 
 function autoreconf {
