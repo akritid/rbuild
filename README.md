@@ -48,6 +48,10 @@ To pass additional command line options to `configure`:
 
     EXTRA_CONFIGURE_ARGS='--enable-optimizations'
 
+To set environment variables for `make` use `BUILD_VARS`, for example:
+
+    BUILD_VARS="GIT_REVISION=$(git rev-parse HEAD)"
+
 The remote build directory on `BUILD_HOST` is `BUILD_DIR`.
 It could be specified in the config file, but the default 
 of `RBUILD_DIR/BASENAME.BUILD_ENV` can be used too. `BUILD_ENV` defaults to `debug` but
