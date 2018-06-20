@@ -87,7 +87,7 @@ function configure {
 
 function build {
     echo Remote build $1 in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "make -C $BUILD_DIR -j$BUILD_JOBS $1"
+    $SSH $BUILD_HOST "$BUILD_VARS make -C $BUILD_DIR -j$BUILD_JOBS $1"
 }
 
 function clean {
