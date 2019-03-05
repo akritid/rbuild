@@ -39,8 +39,9 @@ The following shortcuts can be used instead of the manual method:
 * `rbuild -A` runs `autoreconf --install` in the remote source directory.
 * `rbuild -a` runs `configure --prefix=$INSTALL_DIR` in the remote build directory.
 
-The environment variables passed to `configure` by default are `CC`, `CFLAGS`
-and `PKG_CONFIG_PATH`.  To pass additional variables through `.rbuild.conf`:
+The environment variables passed to `configure` by default are `CC`, `CFLAGS`,
+`CXX`, `CXXFLAGS` and `PKG_CONFIG_PATH`.  To pass additional variables through
+`.rbuild.conf`:
 
     EXTRA_CONFIGURE_VARS="LDFLAGS=-L/usr/local/lib LIBS=\'-lm -lpcap\'"
 
