@@ -69,7 +69,7 @@ function stage {
         else
             echo >&2 "Using built-in rsync exclude file list (displayed with $0 -x)"
             tmpfile=$(mktemp)
-            ($0 -x) > "$tmpfile"
+            dump_exclude_list > "$tmpfile"
             exec 100< "$tmpfile"
             rm "$tmpfile"
         fi
