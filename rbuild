@@ -190,11 +190,12 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             echo -e "-o\t\tShortcut to set BUILD_ENV=optimized"
             echo -e "-j\t\tDefine number of build jobs to run simultaneously (default: 8)"
             echo -e "-i FILE\t\tSpecify the rbuild configuration file (default = $HOME/.rbuild.conf)"
-            echo -e "-x\t\tDump built-in exclude list"
+            echo -e "-x\t\tDump built-in exclude list and exit"
             exit 1
             ;;
         x)
             dump_exclude_list
+            exit 0
             ;;
         e)
             BUILD_ENV=${OPTARG}

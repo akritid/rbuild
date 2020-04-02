@@ -76,7 +76,7 @@ Other command line options include:
 * `-o` is a shortcut to `-e optimized`
 * `-S` copies the source code to the `DEPLOY_HOST` (useful for remote GDB)
 * `-R` removes the source code from the `DEPLOY_HOST`
-* `-x` dump the contents of the built-in rsync file exclusion list
+* `-x` dump the built-in rsync exclude list and exit
 * `-B` build a specific makefile target
 
 
