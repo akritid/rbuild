@@ -184,7 +184,7 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             echo -e "-d\t\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
             echo -e "-D HOST\t\tDeploy binaries from BUILD_HOST to HOST"
             echo -e "-S\t\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
-            echo -e "-R\t\tRemove source code from DEPLOY_HOST the deploy host"
+            echo -e "-R\t\tRemove source code from DEPLOY_HOST"
             echo
             echo -e "-e ENV\t\tSpecify a build environment. Made available as BUILD_ENV for the config file (default=debug)"
             echo -e "-o\t\tShortcut to set BUILD_ENV=optimized"
