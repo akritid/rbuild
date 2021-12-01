@@ -8,6 +8,9 @@ INSTALL_DIR='$HOME/.local'
 BUILD_JOBS=8
 RBUILD_DIR=rbuild
 
+# Default cross compiler root
+CROSS_ROOT=
+
 upsearch () {
     slashes=${PWD//[^\/]/}
     directory="$PWD"
@@ -264,7 +267,29 @@ if [ -n "$deploy_host" ]; then
     DEPLOY_HOST=$deploy_host
 fi
 
-CONFIGURE_VARS="${CONFIGURE_VARS:-PKG_CONFIG_PATH=\'$PKG_CONFIG_PATH\' CC=\'$CC\' CFLAGS=\'$CFLAGS\' CXX=\'$CXX\' CXXFLAGS=\'$CXXFLAGS\' CCAS=gcc CCASFLAGS=}"
+def_cfg_vars=""
+if [ ! -z ${PKG_CONFIG_PATH} ]; then
+    def_cfg_vars="${def_cfg_vars} PKG_CONFIG_PATH=\'$PKG_CONFIG_PATH\'"
+fi
+
+if [ ! -z ${CROSS_ROOT} ]; then
+    def_cfg_vars="${def_cfg_vars} CC=\'${CROSS_ROOT}/usr/bin/gcc\'"
+    def_cfg_vars="${def_cfg_vars} CXX=\'${CROSS_ROOT}/usr/bin/g++\'"
+    def_cfg_vars="${def_cfg_vars} AR=\'${CROSS_ROOT}/usr/bin/gcc-ar\'"
+    def_cfg_vars="${def_cfg_vars} RANLIB=\'${CROSS_ROOT}/usr/bin/gcc-ranlib\'"
+    def_cfg_vars="${def_cfg_vars} NM=\'${CROSS_ROOT}/usr/bin/gcc-nm\'"
+    def_cfg_vars="${def_cfg_vars} CCAS=\'${CROSS_ROOT}/usr/bin/gcc\'"
+fi
+
+if [ ! -z ${CFLAGS} ]; then
+    def_cfg_vars="${def_cfg_vars} CFLAGS=\'${CFLAGS}\'"
+fi
+
+if [ ! -z ${CXXFLAGS} ]; then
+    def_cfg_vars="${def_cfg_vars} CXXFLAGS=\'${CXXFLAGS}\'"
+fi
+
+CONFIGURE_VARS=${CONFIGURE_VARS:-$def_cfg_vars}
 CONFIGURE_VARS+=" $EXTRA_CONFIGURE_VARS"
 
 CONFIGURE_ARGS="${CONFIGURE_ARGS:---prefix $INSTALL_DIR/$BASENAME}"
