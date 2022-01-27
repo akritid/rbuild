@@ -39,6 +39,12 @@ The following shortcuts can be used instead of the manual method:
 * `rbuild -A` runs `autoreconf --install` in the remote source directory.
 * `rbuild -a` runs `configure --prefix=$INSTALL_DIR` in the remote build directory.
 
+The only environment variable passed to `autoreconf` by default is `ACLOCAL_PATH`.
+You can point `ACLOCAL_PATH` in `.rbuild.conf` to directories with custom `m4` macros.
+To pass additional variables through `.rbuild.conf`, use:
+
+    EXTRA_AUTORECONF_VARS="..."
+
 The environment variables passed to `configure` by default are `CC`, `CFLAGS`,
 `CXX`, `CXXFLAGS` and `PKG_CONFIG_PATH`.  To pass additional variables through
 `.rbuild.conf`:

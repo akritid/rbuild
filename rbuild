@@ -80,7 +80,7 @@ function stage {
 
 function autoreconf {
     echo Remote autoreconf in $BUILD_HOST:$STAGING_DIR
-    $SSH $BUILD_HOST "cd \"$STAGING_DIR\" && autoreconf --install"
+    $SSH $BUILD_HOST "cd \"$STAGING_DIR\" && eval $AUTORECONF_VARS autoreconf --install"
 }
 
 function configure {
@@ -263,6 +263,9 @@ load_conf $config_file
 if [ -n "$deploy_host" ]; then
     DEPLOY_HOST=$deploy_host
 fi
+
+AUTORECONF_VARS="${AUTORECONF_VARS:-ACLOCAL_PATH=\'$ACLOCAL_PATH\'}"
+AUTORECONF_VARS+=" $EXTRA_AUTORECONF_VARS"
 
 CONFIGURE_VARS="${CONFIGURE_VARS:-PKG_CONFIG_PATH=\'$PKG_CONFIG_PATH\' CC=\'$CC\' CFLAGS=\'$CFLAGS\' CXX=\'$CXX\' CXXFLAGS=\'$CXXFLAGS\' CCAS=gcc CCASFLAGS=}"
 CONFIGURE_VARS+=" $EXTRA_CONFIGURE_VARS"
