@@ -108,6 +108,11 @@ function rm_build_dir {
     $SSH $BUILD_HOST "rm -rf \"$BUILD_DIR\""
 }
 
+function rm_install_dir {
+    echo Removing $BUILD_HOST:$INSTALL_DIR/$BASENAME
+    $SSH $BUILD_HOST "rm -rf \"$INSTALL_DIR/$BASENAME\""
+}
+
 function deploy {
     if [ -z "$DEPLOY_HOST" ]; then
         echo >&2 "DEPLOY_HOST not set"
@@ -168,7 +173,7 @@ _EOF_
 }
 
 noargs=1
-while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
+while getopts "he:scAaB:brutdD:SRoj:i:x" arg; do
     unset noargs
     case $arg in
         h)
@@ -181,6 +186,7 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             echo -e "-B TARGET\tRun 'make TARGET' on BUILD_HOST"
             echo -e "-b\t\tRun 'make install' on BUILD_HOST"
             echo -e "-r\t\tRemove build directory (when 'make clean' is not enough)"
+            echo -e "-u\t\tRemove install directory"
             echo -e "-d\t\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
             echo -e "-D HOST\t\tDeploy binaries from BUILD_HOST to HOST"
             echo -e "-S\t\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
@@ -220,6 +226,9 @@ while getopts "he:scAaB:brtdD:SRoj:i:x" arg; do
             ;;
         r)
             do_rm_build_dir=1
+            ;;
+        u)
+            do_rm_install_dir=1
             ;;
         b)
             do_build=1
@@ -283,6 +292,10 @@ fi
 
 if [ $do_rm_build_dir ]; then
     rm_build_dir || exit 1
+fi
+
+if [ $do_rm_install_dir ]; then
+    rm_install_dir || exit 1
 fi
 
 if [ $do_autoreconf ]; then
