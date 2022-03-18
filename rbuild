@@ -21,15 +21,15 @@ upsearch () {
 }
 
 function load_conf {
-    if [ -z $1 ]; then
+    if [ -z "$1" ]; then
         conf=$(upsearch .rbuild.conf)
     else
         conf=$1
     fi
 
     if [ -z "$conf" ]; then
-        if [ -e $HOME/.rbuild.conf ]; then
-            . $HOME/.rbuild.conf
+        if [ -e "$HOME/.rbuild.conf" ]; then
+            . "$HOME/.rbuild.conf"
         else
             echo >&2 "Could not find required file .rbuild.conf or ~/.rbuild.conf"
             echo >&2 "Please create one and rerun to get additional instructions"
@@ -57,13 +57,13 @@ function load_conf {
 
 
 function stage {
-    echo Staging source from $LOCAL_DIR to $BUILD_HOST:$STAGING_DIR
+    echo "Staging source from $LOCAL_DIR to $BUILD_HOST:$STAGING_DIR"
 
     if [ -e "$PWD/.rbuild.exclude" ]; then
         echo >&2 "Using rsync exclude file $PWD/.rbuild.exclude"
         exec 100< "$PWD/.rbuild.exclude"
     else
-        if [ -e $HOME/.rbuild.exclude ]; then
+        if [ -e "$HOME/.rbuild.exclude" ]; then
             echo >&2 "Using rsync exclude file $HOME/.rbuild.exclude"
             exec 100< "$HOME/.rbuild.exclude"
         else
@@ -79,38 +79,38 @@ function stage {
 }
 
 function autoreconf {
-    echo Remote autoreconf in $BUILD_HOST:$STAGING_DIR
-    $SSH $BUILD_HOST "cd \"$STAGING_DIR\" && eval $AUTORECONF_VARS autoreconf --install"
+    echo "Remote autoreconf in $BUILD_HOST:$STAGING_DIR"
+    $SSH "$BUILD_HOST" "cd \"$STAGING_DIR\" && eval $AUTORECONF_VARS autoreconf --install"
 }
 
 function configure {
-    echo Remote configure in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && eval $CONFIGURE_VARS \"../$BASENAME/configure\" $CONFIGURE_ARGS"
+    echo "Remote configure in $BUILD_HOST:$BUILD_DIR"
+    $SSH "$BUILD_HOST" "mkdir -p \"$BUILD_DIR\" && cd \"$BUILD_DIR\" && eval $CONFIGURE_VARS \"../$BASENAME/configure\" $CONFIGURE_ARGS"
 }
 
 function build {
-    echo Remote build $1 in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "$BUILD_VARS make -C $BUILD_DIR -j$BUILD_JOBS $1"
+    echo "Remote build $1 in $BUILD_HOST:$BUILD_DIR"
+    $SSH "$BUILD_HOST" "$BUILD_VARS make -C $BUILD_DIR -j$BUILD_JOBS $1"
 }
 
 function check {
-    echo Running tests in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "make -C $BUILD_DIR check || cat $BUILD_DIR/test-suite.log"
+    echo "Running tests in $BUILD_HOST:$BUILD_DIR"
+    $SSH "$BUILD_HOST" "make -C $BUILD_DIR check || cat $BUILD_DIR/test-suite.log"
 }
 
 function clean {
-    echo Remote clean in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "make -C $BUILD_DIR clean"
+    echo "Remote clean in $BUILD_HOST:$BUILD_DIR"
+    $SSH "$BUILD_HOST" "make -C $BUILD_DIR clean"
 }
 
 function rm_build_dir {
-    echo Removing $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "rm -rf \"$BUILD_DIR\""
+    echo "Removing $BUILD_HOST:$BUILD_DIR"
+    $SSH "$BUILD_HOST" "rm -rf \"$BUILD_DIR\""
 }
 
 function rm_install_dir {
-    echo Removing $BUILD_HOST:$INSTALL_DIR/$BASENAME
-    $SSH $BUILD_HOST "rm -rf \"$INSTALL_DIR/$BASENAME\""
+    echo "Removing $BUILD_HOST:$INSTALL_DIR/$BASENAME"
+    $SSH "$BUILD_HOST" "rm -rf \"$INSTALL_DIR/$BASENAME\""
 }
 
 function deploy {
@@ -119,8 +119,8 @@ function deploy {
         echo >&2 "Please set it using an IP address in .rbuild.conf, for example: DEPLOY_HOST=10.14.0.11"
         exit 1
     fi
-    echo Deploy $INSTALL_DIR/$BASENAME from $BUILD_HOST to $DEPLOY_HOST
-    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path="\"mkdir -p $INSTALL_DIR && rsync\"" "$INSTALL_DIR/$BASENAME/" "$DEPLOY_HOST:$INSTALL_DIR/$BASENAME"
+    echo "Deploy $INSTALL_DIR/$BASENAME from $BUILD_HOST to $DEPLOY_HOST"
+    $SSH -A "$BUILD_HOST" rsync --del -avz -e "\"$SSH\"" --rsync-path="\"mkdir -p $INSTALL_DIR && rsync\"" "$INSTALL_DIR/$BASENAME/" "$DEPLOY_HOST:$INSTALL_DIR/$BASENAME"
 }
 
 function deploy_source {
@@ -129,8 +129,8 @@ function deploy_source {
         echo >&2 "Please set it using an IP address in .rbuild.conf, for example: DEPLOY_HOST=10.14.0.11"
         exit 1
     fi
-    echo Code push $STAGING_DIR from $BUILD_HOST to $DEPLOY_HOST
-    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" "$STAGING_DIR/" "$DEPLOY_HOST:$STAGING_DIR"
+    echo "Code push $STAGING_DIR from $BUILD_HOST to $DEPLOY_HOST"
+    $SSH -A "$BUILD_HOST" rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" "$STAGING_DIR/" "$DEPLOY_HOST:$STAGING_DIR"
 }
 
 function retract_source {
@@ -139,8 +139,8 @@ function retract_source {
         echo >&2 "Please set it using an IP address in .rbuild.conf, for example: DEPLOY_HOST=10.14.0.11"
         exit 1
     fi
-    echo Removing source code from $DEPLOY_HOST:$STAGING_DIR
-    $SSH -A $BUILD_HOST $SSH $DEPLOY_HOST rm -rf $STAGING_DIR
+    echo "Removing source code from $DEPLOY_HOST:$STAGING_DIR"
+    $SSH -A "$BUILD_HOST" $SSH "$DEPLOY_HOST" rm -rf "$STAGING_DIR"
 }
 
 function dump_exclude_list {
@@ -266,11 +266,11 @@ fi
 
 export BUILD_ENV
 
-load_conf $config_file
+load_conf "$config_file"
 
 
 if [ -n "$deploy_host" ]; then
-    DEPLOY_HOST=$deploy_host
+    DEPLOY_HOST="$deploy_host"
 fi
 
 AUTORECONF_VARS="${AUTORECONF_VARS:-ACLOCAL_PATH=\'$ACLOCAL_PATH\'}"
@@ -310,8 +310,8 @@ if [ $do_build ]; then
     build "install" || exit 1
 fi
 
-if [ $build_target ]; then
-    build $build_target || exit 1
+if [ "$build_target" ]; then
+    build "$build_target" || exit 1
 fi
 
 if [ $do_check ]; then
