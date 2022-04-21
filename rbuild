@@ -14,7 +14,7 @@ upsearch () {
     for (( n=${#slashes}; n>0; --n ))
     do
         for i in $*; do
-            test -e "$directory/$i" && echo "$directory/$i" && return 
+            test -e "$directory/$i" && echo "$directory/$i" && return
         done
         directory="$directory/.."
     done
@@ -75,7 +75,7 @@ function stage {
         fi
     fi
 
-    rsync -r -l -c --executability --del --inplace  -z -e "$SSH" --rsync-path="mkdir -p \"$STAGING_DIR\" && rsync" --cvs-exclude --exclude .hg --exclude .git --exclude-from <(cat <&100) "$LOCAL_DIR/" "$BUILD_HOST:\"$STAGING_DIR\""
+    RSYNC_OLD_ARGS=1 rsync -r -l -c --executability --del --inplace  -z -e "$SSH" --rsync-path="mkdir -p \"$STAGING_DIR\" && rsync" --cvs-exclude --exclude .hg --exclude .git --exclude-from <(cat <&100) "$LOCAL_DIR/" "$BUILD_HOST:\"$STAGING_DIR\""
 }
 
 function autoreconf {
@@ -120,7 +120,7 @@ function deploy {
         exit 1
     fi
     echo Deploy $INSTALL_DIR/$BASENAME from $BUILD_HOST to $DEPLOY_HOST
-    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path="\"mkdir -p $INSTALL_DIR && rsync\"" "$INSTALL_DIR/$BASENAME/" "$DEPLOY_HOST:$INSTALL_DIR/$BASENAME"
+    $SSH -A $BUILD_HOST RSYNC_OLD_ARGS=1 rsync --del -avz -e "\"$SSH\"" --rsync-path="\"mkdir -p $INSTALL_DIR && rsync\"" "$INSTALL_DIR/$BASENAME/" "$DEPLOY_HOST:$INSTALL_DIR/$BASENAME"
 }
 
 function deploy_source {
@@ -130,7 +130,7 @@ function deploy_source {
         exit 1
     fi
     echo Code push $STAGING_DIR from $BUILD_HOST to $DEPLOY_HOST
-    $SSH -A $BUILD_HOST rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" "$STAGING_DIR/" "$DEPLOY_HOST:$STAGING_DIR"
+    $SSH -A $BUILD_HOST RSYNC_OLD_ARGS=1 rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" "$STAGING_DIR/" "$DEPLOY_HOST:$STAGING_DIR"
 }
 
 function retract_source {
@@ -177,7 +177,7 @@ while getopts "he:scAaB:brutdD:SRoj:i:x" arg; do
     unset noargs
     case $arg in
         h)
-            echo "Usage:" 
+            echo "Usage:"
             echo -e "-s\t\tStage source code from the current directory to BUILD_HOST"
             echo -e "-c\t\tRun 'make clean' on BUILD_HOST"
             echo -e "-t\t\tRun 'make check' on BUILD_HOST"
