@@ -95,7 +95,7 @@ function build {
 
 function check {
     echo Running tests in $BUILD_HOST:$BUILD_DIR
-    $SSH $BUILD_HOST "make -C $BUILD_DIR check || cat $BUILD_DIR/test-suite.log"
+    $SSH $BUILD_HOST "$BUILD_VARS make -C $BUILD_DIR check || cat $BUILD_DIR/test-suite.log"
 }
 
 function clean {
