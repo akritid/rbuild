@@ -133,6 +133,11 @@ function deploy_source {
     $SSH -A $BUILD_HOST RSYNC_OLD_ARGS=1 rsync --del -avz -e "\"$SSH\"" --rsync-path=\""mkdir -p $RBUILD_DIR && rsync\"" "$STAGING_DIR/" "$DEPLOY_HOST:$STAGING_DIR"
 }
 
+function rm_source_dir {
+    echo Removing source code from $BUILD_HOST:$STAGING_DIR
+    $SSH $BUILD_HOST "rm -rf \"$STAGING_DIR\""
+}
+
 function retract_source {
     if [ -z "$DEPLOY_HOST" ]; then
         echo >&2 "DEPLOY_HOST not set"
@@ -173,7 +178,7 @@ _EOF_
 }
 
 noargs=1
-while getopts "he:scAaB:brutdD:SRoj:i:x" arg; do
+while getopts "he:scAaB:brutdD:SMRoj:i:x" arg; do
     unset noargs
     case $arg in
         h)
@@ -190,6 +195,7 @@ while getopts "he:scAaB:brutdD:SRoj:i:x" arg; do
             echo -e "-d\t\tDeploy binaries from BUILD_HOST to DEPLOY_HOST"
             echo -e "-D HOST\t\tDeploy binaries from BUILD_HOST to HOST"
             echo -e "-S\t\tDeploy source code from BUILD_HOST to DEPLOY_HOST (e.g. for GDB)"
+            echo -e "-M\t\tRemove source code from BUILD_HOST"
             echo -e "-R\t\tRemove source code from DEPLOY_HOST"
             echo
             echo -e "-e ENV\t\tSpecify a build environment. Made available as BUILD_ENV for the config file (default=debug)"
@@ -243,6 +249,9 @@ while getopts "he:scAaB:brutdD:SRoj:i:x" arg; do
         S)
             do_deploy_source=1
             ;;
+        M)
+            do_rm_source_dir=1
+            ;;
         R)
             do_retract_source=1
             ;;
@@ -281,6 +290,10 @@ CONFIGURE_VARS+=" $EXTRA_CONFIGURE_VARS"
 
 CONFIGURE_ARGS="${CONFIGURE_ARGS:---prefix $INSTALL_DIR/$BASENAME}"
 CONFIGURE_ARGS+=" $EXTRA_CONFIGURE_ARGS"
+
+if [ $do_rm_source_dir ]; then
+    rm_source_dir || exit 1
+fi
 
 if [ $do_stage ]; then
     stage || exit 1
